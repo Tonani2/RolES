@@ -33,7 +33,7 @@ app.MapPost("/usuario", async (CadastroUsuarioDto requestBody, UsuarioServicos u
 {
     try
     {
-        var linhasAfetadas =  await uServicos.adicionarAsync(requestBody);
+        var linhasAfetadas =  await uServicos.AdicionarAsync(requestBody);
             
         if (linhasAfetadas > 0) return Results.Created();
 
@@ -54,6 +54,30 @@ app.MapPost("/usuario", async (CadastroUsuarioDto requestBody, UsuarioServicos u
         return Results.InternalServerError();
     }
     
+});
+
+app.MapPost("/login", async (LoginUsuarioDto corpoRequisicao, UsuarioServicos uServicos) =>
+{
+    try
+    {
+       var UsuarioEncontrado = await uServicos.BuscarPorEmailAsync(corpoRequisicao.Email);
+
+       if (UsuarioEncontrado == null) return Results.NotFound(new
+       {
+           Mesagem = "O usuário não foi encontrado"
+       });
+
+       if (corpoRequisicao.Senha != UsuarioEncontrado.Senha) return Results.BadRequest(new
+       {
+           Mensagem = "Email/senha estão incorretos."
+       });
+       
+       return Results.Ok();
+    }
+    catch
+    {
+        return Results.InternalServerError();
+    }
 });
 
 app.Run();
